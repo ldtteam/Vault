@@ -19,7 +19,12 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
      * @return The {@link IInheritanceTreeElement<E> root} of the inheritance tree.
      */
     @NotNull
-    IInheritanceTreeElement<E> getRoot();
+    default IInheritanceTreeElement<E> getRoot() {
+        if (getParent() == null)
+            return this;
+
+        return getParent().getRoot();
+    }
 
     /**
      * Method used to check if this {@link IInheritanceTreeElement<E> element} is the {@link IInheritanceTreeElement<E> root} of the tree.
@@ -32,9 +37,9 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
     /**
      * Method to get the direct {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element} in the inheritance tree.
      * If this {@link IInheritanceTreeElement<E> element} is the {@link IInheritanceTreeElement<E> root} of the tree it should return itself.
-     * @return The {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element}
+     * @return The {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element}, or null if it is the root.
      */
-    @NotNull
+    @Nullable
     IInheritanceTreeElement<E> getParent();
 
     /**
@@ -75,7 +80,7 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
 
     /**
      * Method used to remove the given {@link E child} from the children of this {@link IInheritanceTreeElement<E> element} and turn it into a new Tree.
-     * To create the new tree its {@link #setParent(IInheritanceTreeElement)} is called with a null parameter.
+     *
      * @param child The {@link IInheritanceTreeElement<E> child} to remove and make a new {@link IInheritanceTreeElement<E> root}.
      * @return The instance this was called upon.
      * @throws IllegalArgumentException Thrown when the given {@link IInheritanceTreeElement<E> child} is not known to this {@link IInheritanceTreeElement<E> element.}
@@ -142,8 +147,4 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
         //Build the sibling set.
         return siblingsBuilder.build();
     }
-
-
-
-    default
 }
