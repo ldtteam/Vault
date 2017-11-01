@@ -1,0 +1,27 @@
+.idea/
+.gradle/
+classes/
+build/
+eclipse/
+logs/
+mods/
+out/
+run/
+*.iml
+*.ipr
+*.iws
+MinecraftForge*.txt
+CREDITS*
+LICENSE-fml*
+*changelog.txt
+README.txt
+/bin/
+*.hprof
+/.gradle/
+/build/**
+
+# Exclude all Mac DS_Store files
+/**/.DS_Store
+
+# Exclude all Windows stuff
+/**/Thumbs.db
