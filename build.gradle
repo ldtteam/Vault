@@ -75,15 +75,15 @@ dependencies {
 
 group = "com.minecolonies"
 def buildnumber = System.getenv()['BUILD_NUMBER'] != null ? System.getenv()['BUILD_NUMBER'] : "custom"
-version = "${version_minecraft}-${version_major}.${version_minor}.${version_feature}.${buildnumber}";
-archiveBaseName="vault"
+version = "${version_minecraft}-${version_vault_major}.${version_vault_minor}.${version_vault_feature}.${buildnumber}";
+archivesBaseName="vault"
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 minecraft {
 
-    version = minecraft_version + "-" + forge_version
+    version = version_minecraft + "-" + version_forge
     runDir = "run"
 
     mappings = "${version_mappings}"
