@@ -1,5 +1,6 @@
 package com.minecolonies.vault.api.inheritance;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import static org.junit.Assert.*;
 
@@ -90,70 +92,82 @@ public class IInheritanceTreeElementTest
     }
 
     @Test
-    public void getParent() throws Exception
-    {
-        assertEquals(null, root.getParent());
-
-        assertEquals(root, rootChild1.getParent());
-        assertEquals(root, rootChild2.getParent());
-
-        assertEquals(rootChild1, rootChild1Child.getParent());
-
-        assertEquals(rootChild2, rootChild2Child1.getParent());
-        assertEquals(rootChild2, rootChild2Child2.getParent());
-        assertEquals(rootChild2, rootChild2Child3.getParent());
-
-        assertEquals(rootChild2Child1, rootChild2Child1Child1.getParent());
-        assertEquals(rootChild2Child1, rootChild2Child1Child2.getParent());
-
-        assertEquals(rootChild2Child3, rootChild2Child3Child1.getParent());
-        assertEquals(rootChild2Child3, rootChild2Child3Child2.getParent());
-    }
-
-    @Test
-    public void setParent() throws Exception
-    {
-
-    }
-
-    @Test
-    public void getChildren() throws Exception
-    {
-    }
-
-    @Test
     public void isLeaf() throws Exception
     {
-    }
+        assertEquals(false, root.isLeaf());
 
-    @Test
-    public void addChild() throws Exception
-    {
-    }
+        assertEquals(false, rootChild1.isLeaf());
+        assertEquals(false, rootChild2.isLeaf());
 
-    @Test
-    public void removeChild() throws Exception
-    {
+        assertEquals(true, rootChild1Child.isLeaf());
+
+        assertEquals(false, rootChild2Child1.isLeaf());
+        assertEquals(true, rootChild2Child2.isLeaf());
+        assertEquals(false, rootChild2Child3.isLeaf());
+
+        assertEquals(true, rootChild2Child1Child1.isLeaf());
+        assertEquals(true, rootChild2Child1Child2.isLeaf());
+
+        assertEquals(true, rootChild2Child3Child1.isLeaf());
+        assertEquals(true, rootChild2Child3Child2.isLeaf());
     }
 
     @Test
     public void getElementDepth() throws Exception
     {
+        assertEquals(1, root.getElementDepth());
+
+        assertEquals(2, rootChild1.getElementDepth());
+        assertEquals(2, rootChild2.getElementDepth());
+
+        assertEquals(3, rootChild1Child.getElementDepth());
+
+        assertEquals(3, rootChild2Child1.getElementDepth());
+        assertEquals(3, rootChild2Child2.getElementDepth());
+        assertEquals(3, rootChild2Child3.getElementDepth());
+
+        assertEquals(4, rootChild2Child1Child1.getElementDepth());
+        assertEquals(4, rootChild2Child1Child2.getElementDepth());
+
+        assertEquals(4, rootChild2Child3Child1.getElementDepth());
+        assertEquals(4, rootChild2Child3Child2.getElementDepth());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getSiblingsOnRoot() throws Exception
+    {
+        root.getSiblings();
+        assertTrue(false);
     }
 
     @Test
     public void getSiblings() throws Exception
     {
+        runSiblingsTest(ImmutableSet.of(rootChild1, rootChild2), t -> t.getSiblings());
     }
 
     @Test
     public void getMaximalOrderSiblings() throws Exception
     {
+        runSiblingsTest(ImmutableSet.of(rootChild1, rootChild2), t -> t.getMaximalOrderSiblings());
+
+        runSiblingsTest(ImmutableSet.of(rootChild1Child, rootChild2Child1, rootChild2Child2, rootChild2Child3), t -> t.getMaximalOrderSiblings());
+
+        runSiblingsTest(ImmutableSet.of(rootChild2Child1Child1, rootChild2Child1Child2, rootChild2Child3Child1, rootChild2Child3Child2), t -> t.getMaximalOrderSiblings());
     }
 
-    @Test
-    public void getSiblings1() throws Exception
+    private void runSiblingsTest(Set<IInheritanceTreeElement<TestTreeImplementation>> toTest, Function<IInheritanceTreeElement<TestTreeImplementation>, ImmutableSet<IInheritanceTreeElement<TestTreeImplementation>>> siblingsMethod) throws Exception
     {
+        toTest.forEach((IInheritanceTreeElement<TestTreeImplementation> t) -> {
+            Set<IInheritanceTreeElement<TestTreeImplementation>> result = new HashSet<>();
+            result.addAll(toTest);
+            result.remove(t);
+
+            final ImmutableSet<IInheritanceTreeElement<TestTreeImplementation>> siblings = siblingsMethod.apply(t);
+
+            assertEquals(result.size(), siblings.size());
+            result.forEach(e -> assertTrue(siblings.contains(e)));
+        });
     }
 
     /**
