@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -15,50 +17,50 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
 {
 
     /**
-     * Method to get the {@link IInheritanceTreeElement<E> root} of this {@link IInheritanceTreeElement<E> element} in the inheritance tree.
-     * @return The {@link IInheritanceTreeElement<E> root} of the inheritance tree.
+     * Method to get the {@link E root} of this {@link E element} in the inheritance tree.
+     * @return The {@link E root} of the inheritance tree.
      */
     @NotNull
-    default IInheritanceTreeElement<E> getRoot() {
+    default E getRoot() {
         if (getParent() == null)
-            return this;
+            return (E) this;
 
         return getParent().getRoot();
     }
 
     /**
-     * Method used to check if this {@link IInheritanceTreeElement<E> element} is the {@link IInheritanceTreeElement<E> root} of the tree.
-     * @return True when this is the {@link IInheritanceTreeElement<E> root} false when not.
+     * Method used to check if this {@link E element} is the {@link E root} of the tree.
+     * @return True when this is the {@link E root} false when not.
      */
     default boolean isRoot(){
         return getRoot().equals(this);
     }
 
     /**
-     * Method to get the direct {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element} in the inheritance tree.
-     * If this {@link IInheritanceTreeElement<E> element} is the {@link IInheritanceTreeElement<E> root} of the tree it should return itself.
-     * @return The {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element}, or null if it is the root.
+     * Method to get the direct {@link E parent} of this {@link E element} in the inheritance tree.
+     * If this {@link E element} is the {@link E root} of the tree it should return itself.
+     * @return The {@link E parent} of this {@link E element}, or null if it is the root.
      */
     @Nullable
-    IInheritanceTreeElement<E> getParent();
+    E getParent();
 
     /**
-     * Method used to set the {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element}.
-     * Removes this {@link IInheritanceTreeElement<E> element} from the children list of the current {@link IInheritanceTreeElement<E> parent}, if applicable, by calling the {@link #getParent()#removeChild} method.
-     * Adds this {@link IInheritanceTreeElement<E> element} to the children list of the given {@link IInheritanceTreeElement<E> parent}, if applicable, by calling the {@link #getParent()#addChild} method.
+     * Method used to set the {@link E parent} of this {@link E element}.
+     * Removes this {@link E element} from the children list of the current {@link E parent}, if applicable, by calling the {@link #getParent()#removeChild} method.
+     * Adds this {@link E element} to the children list of the given {@link E parent}, if applicable, by calling the {@link #getParent()#addChild} method.
      *
-     * If null is passed as a new {@link IInheritanceTreeElement<E> parent}, this {@link IInheritanceTreeElement<E> element} is turned into the {@link IInheritanceTreeElement<E> root} if all of its {@link IInheritanceTreeElement<E> children}.
+     * If null is passed as a new {@link E parent}, this {@link E element} is turned into the {@link E root} if all of its {@link E children}.
      *
-     * @param parent The new {@link IInheritanceTreeElement<E> parent} of this {@link IInheritanceTreeElement<E> element}
-     * @return The {@link IInheritanceTreeElement<E> instance} this was called upon.
+     * @param parent The new {@link E parent} of this {@link E element}
+     * @return The {@link E instance} this was called upon.
      */
-    IInheritanceTreeElement<E> setParent(@Nullable final IInheritanceTreeElement<E> parent);
+    E setParent(@Nullable final E parent);
 
     /**
-     * Method to get the {@link ImmutableList<IInheritanceTreeElement<E>> children} of this {@link IInheritanceTreeElement<E> element}.
-     * @return The {@link ImmutableList<IInheritanceTreeElement<E>> children} of this {@link IInheritanceTreeElement<E> element}
+     * Method to get the {@link ImmutableList<E> children} of this {@link E element}.
+     * @return The {@link ImmutableList<E> children} of this {@link E element}
      */
-    ImmutableSet<IInheritanceTreeElement<E>> getChildren();
+    ImmutableSet<E> getChildren();
 
     /**
      * Method used to check if this is a leaf or not.
@@ -69,23 +71,23 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
     }
 
     /**
-     * Method used to add a {@link IInheritanceTreeElement<E> child} to this {@link IInheritanceTreeElement<E> element} of the inheritance tree.
-     * This {@link IInheritanceTreeElement<E> child} has to be unique.
+     * Method used to add a {@link E child} to this {@link E element} of the inheritance tree.
+     * This {@link E child} has to be unique.
      *
-     * @param child The new unique {@link IInheritanceTreeElement<E> child} that is to be added to the tree as a child to this {@link IInheritanceTreeElement<E> element}
-     * @return The {@link IInheritanceTreeElement<E> instance} this was called upon.
-     * @throws IllegalArgumentException Thrown when either the {@link IInheritanceTreeElement<E> child} is already known, or its {@link #getParent()} is not equal to the current instance.
+     * @param child The new unique {@link E child} that is to be added to the tree as a child to this {@link E element}
+     * @return The {@link E instance} this was called upon.
+     * @throws IllegalArgumentException Thrown when either the {@link E child} is already known, or its {@link #getParent()} is not equal to the current instance.
      */
-    IInheritanceTreeElement<E> addChild(@NotNull final IInheritanceTreeElement<E> child) throws IllegalArgumentException;
+    E addChild(@NotNull final E child) throws IllegalArgumentException;
 
     /**
-     * Method used to remove the given {@link E child} from the children of this {@link IInheritanceTreeElement<E> element} and turn it into a new Tree.
+     * Method used to remove the given {@link E child} from the children of this {@link E element} and turn it into a new Tree.
      *
-     * @param child The {@link IInheritanceTreeElement<E> child} to remove and make a new {@link IInheritanceTreeElement<E> root}.
+     * @param child The {@link E child} to remove and make a new {@link E root}.
      * @return The instance this was called upon.
-     * @throws IllegalArgumentException Thrown when the given {@link IInheritanceTreeElement<E> child} is not known to this {@link IInheritanceTreeElement<E> element.}
+     * @throws IllegalArgumentException Thrown when the given {@link E child} is not known to this {@link E element.}
      */
-    IInheritanceTreeElement<E> removeChild(@NotNull final IInheritanceTreeElement<E> child) throws IllegalArgumentException;
+    E removeChild(@NotNull final E child) throws IllegalArgumentException;
 
     /**
      * Method used to get the depth of the element.
@@ -105,7 +107,7 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
      * @return A {@link ImmutableList<E> list of siblings} from the first order.
      * @throws IllegalArgumentException when this is the root of a tree.
      */
-     default ImmutableSet<IInheritanceTreeElement<E>> getSiblings() throws IllegalArgumentException {
+     default ImmutableSet<E> getSiblings() throws IllegalArgumentException {
          return getSiblings(1);
      }
 
@@ -114,7 +116,7 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
      * @return
      * @throws IllegalArgumentException
      */
-     default ImmutableSet<IInheritanceTreeElement<E>> getMaximalOrderSiblings() throws IllegalArgumentException {
+     default ImmutableSet<E> getMaximalOrderSiblings() throws IllegalArgumentException {
          return getSiblings(getElementDepth() - 1);
      }
 
@@ -124,7 +126,7 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
      * @return A {@link ImmutableList<E> list of siblings} from given order.
      * @throws IllegalArgumentException Thrown when the tree is not of the required depth to have this order.
      */
-    default ImmutableSet<IInheritanceTreeElement<E>> getSiblings(final int order) throws IllegalArgumentException {
+    default ImmutableSet<E> getSiblings(final int order) throws IllegalArgumentException {
         if (order <= 0)
             return ImmutableSet.of();
 
@@ -132,8 +134,8 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
             throw new IllegalArgumentException("Can not get siblings of root, as root has no parent. Maybe your order was to big?");
 
         //Get all the aunt/uncles of that order.
-        ImmutableSet<IInheritanceTreeElement<E>> parentSiblings = getParent().getSiblings(order - 1);
-        ImmutableSet.Builder<IInheritanceTreeElement<E>> siblingsBuilder = ImmutableSet.builder();
+        ImmutableSet<E> parentSiblings = getParent().getSiblings(order - 1);
+        ImmutableSet.Builder<E> siblingsBuilder = ImmutableSet.builder();
 
         //Get all the children of every aunt and uncle.
         //Making sure to not add ourselfs.
@@ -146,5 +148,47 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
 
         //Build the sibling set.
         return siblingsBuilder.build();
+    }
+
+    /**
+     * Returns the maximal residual depth of this node.
+     * Any leaf will have a residual depth of 0.
+     *
+     * @return The Maximal residual depth of this node.
+     */
+    default int getMaximalResidualDepth() {
+        if (isLeaf())
+            return 0;
+
+        return getChildren().stream().mapToInt(c -> c.getMaximalResidualDepth()).max().orElse(-1) + 1;
+    }
+
+    /**
+     * Method used to get a cloned empty element, without parent (so as root) and without children.
+     * @return A new instance of this element, as empty root.
+     */
+    E cloneAsEmptyRoot();
+
+    /**
+     * Returns the deepest child matching the given criteria, or itself (if no child matches but this)
+     * @param searchCriteria The criteria to search for.
+     * @return The deepest child matching the criteria.
+     */
+    @Nullable
+    default E getDeepestChild(Predicate<E> searchCriteria)
+    {
+        E matching = getChildren().stream().sorted(Comparator.comparing(c -> getMaximalResidualDepth())).map(c -> c.getDeepestChild(searchCriteria)).filter(r -> r != null).findFirst().orElse(null);
+
+        if (matching != null)
+        {
+            return matching;
+        }
+
+        if (searchCriteria.test((E) this))
+        {
+            return (E) this;
+        }
+
+        return null;
     }
 }
