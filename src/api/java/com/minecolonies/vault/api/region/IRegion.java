@@ -1,8 +1,8 @@
 package com.minecolonies.vault.api.region;
 
+import com.minecolonies.vault.api.grouping.IGrouping;
 import com.minecolonies.vault.api.inheritance.ISaveableDataHoldingInheritanceTree;
 import com.minecolonies.vault.api.location.ILocation;
-import com.minecolonies.vault.api.permission.IPermission;
 import net.minecraft.nbt.NBTTagCompound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * A single {@link IRegion region} can be divided into multiple children each with their own properties and characteristics.
  * These divisions of {@link IRegion regions} into smaller children is implemented into an inheritance tree.
  */
-public interface IRegion extends ISaveableDataHoldingInheritanceTree<IRegion, IPermission, NBTTagCompound>
+public interface IRegion extends ISaveableDataHoldingInheritanceTree<IRegion, IGrouping, NBTTagCompound>
 {
 
     /**
@@ -43,5 +43,5 @@ public interface IRegion extends ISaveableDataHoldingInheritanceTree<IRegion, IP
     }
 
     @Override
-    IPermission deserializeData(@NotNull final NBTTagCompound dataNbt);
+    IGrouping deserializeData(@NotNull final NBTTagCompound dataNbt);
 }
