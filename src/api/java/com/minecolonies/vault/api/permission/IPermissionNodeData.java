@@ -1,8 +1,8 @@
 package com.minecolonies.vault.api.permission;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTBase;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface IPermissionNodeData extends INBTSerializable<NBTTagCompound>
+public interface IPermissionNodeData<N extends NBTBase> extends INBTSerializable<N>
 {
 }

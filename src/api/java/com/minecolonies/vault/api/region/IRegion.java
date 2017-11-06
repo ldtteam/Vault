@@ -1,9 +1,13 @@
 package com.minecolonies.vault.api.region;
 
-import com.minecolonies.vault.api.grouping.IGrouping;
+import com.minecolonies.vault.api.grouping.IGroup;
 import com.minecolonies.vault.api.inheritance.ISaveableDataHoldingInheritanceTree;
 import com.minecolonies.vault.api.location.ILocation;
+import com.minecolonies.vault.api.permission.IPermissionNode;
+import com.minecolonies.vault.api.permission.IPermissionNodeData;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  * A single {@link IRegion region} can be divided into multiple children each with their own properties and characteristics.
  * These divisions of {@link IRegion regions} into smaller children is implemented into an inheritance tree.
  */
-public interface IRegion extends ISaveableDataHoldingInheritanceTree<IRegion, IGrouping, NBTTagCompound>
+public interface IRegion<R extends IRegion<R, G, P, D, N>, G extends IGroup<G, P, D, N>, P extends IPermissionNode<P, D, N>, D extends IPermissionNodeData<N>, N extends NBTBase> extends ISaveableDataHoldingInheritanceTree<R, G, NBTTagCompound>
 {
 
     /**
@@ -37,11 +41,16 @@ public interface IRegion extends ISaveableDataHoldingInheritanceTree<IRegion, IG
         return getDeepestChild(r -> r.isIn(target));
     }
 
-    @Override
-    default NBTTagCompound serializeData(){
-        return getData().serializeNBT();
-    }
+    /**
+     * Method to get the dimension Id of the world this Region is in.
+     * @return The dimension Id this world is in.
+     */
+    int getDimensionId();
 
-    @Override
-    IGrouping deserializeData(@NotNull final NBTTagCompound dataNbt);
+    /**
+     *
+     * @return
+     */
+    @Nullable
+    AxisAlignedBB getRegion();
 }

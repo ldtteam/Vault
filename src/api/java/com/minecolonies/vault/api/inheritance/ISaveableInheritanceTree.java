@@ -39,5 +39,5 @@ public interface ISaveableInheritanceTree<E extends ISaveableInheritanceTree<E>>
         });
     }
 
-    ISaveableInheritanceTree<E> getNewInstance();
+    E getNewInstance();
 }

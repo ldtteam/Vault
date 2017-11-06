@@ -1,26 +1,8 @@
 package com.minecolonies.vault.api.permission;
 
 import com.minecolonies.vault.api.inheritance.ISaveableDataHoldingInheritanceTree;
-import com.minecolonies.vault.api.inheritance.ISaveableInheritanceTree;
-import net.minecraft.nbt.NBTTagCompound;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.NBTBase;
 
-public interface IPermissionNode extends ISaveableDataHoldingInheritanceTree<IPermissionNode, IPermissionNodeData, NBTTagCompound>
+public interface IPermissionNode<N extends IPermissionNode<N, D, T>, D extends IPermissionNodeData<T>, T extends NBTBase> extends ISaveableDataHoldingInheritanceTree<N, D, T>
 {
-
-    @Override
-    default IPermissionNodeData deserializeData(@NotNull final NBTTagCompound dataNbt)
-    {
-        IPermissionNodeData newInstance = getNewDataInstance();
-
-        newInstance.deserializeNBT(dataNbt);
-
-        return newInstance;
-    }
-
-    /**
-     * Method used to get a new instance of the {@link IPermissionNodeData data}
-     * @return Thew new standard instance of the {@link IPermissionNodeData data}
-     */
-    IPermissionNodeData getNewDataInstance();
 }

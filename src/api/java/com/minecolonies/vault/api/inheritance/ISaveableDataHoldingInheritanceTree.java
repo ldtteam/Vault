@@ -4,13 +4,14 @@ import com.minecolonies.vault.api.utils.NBTUtils;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
 
 import static com.minecolonies.vault.api.constants.ModNBTConstants.Trees.CONST_NBT_CHILDREN;
 import static com.minecolonies.vault.api.constants.ModNBTConstants.Trees.CONST_NBT_DATA;
 import static net.minecraftforge.common.util.Constants.NBT.TAG_COMPOUND;
 
-public interface ISaveableDataHoldingInheritanceTree<E extends ISaveableDataHoldingInheritanceTree<E, D, N>, D, N extends NBTBase> extends ISaveableInheritanceTree<E>, IReadWriteDataHoldingInheritanceTreeElement<E, D>
+public interface ISaveableDataHoldingInheritanceTree<E extends ISaveableDataHoldingInheritanceTree<E, D, N>, D extends INBTSerializable<N>, N extends NBTBase> extends ISaveableInheritanceTree<E>, IReadWriteDataHoldingInheritanceTreeElement<E, D>
 {
 
     @Override
@@ -30,11 +31,10 @@ public interface ISaveableDataHoldingInheritanceTree<E extends ISaveableDataHold
         return compound;
     }
 
-    /**
-     * Method used to serialize the data that is stored in this element.
-     * @return NBTTag representing the data stored in this element.
-     */
-    N serializeData();
+    default N serializeData()
+    {
+        return getData().serializeNBT();
+    }
 
     @Override
     default void deserializeNBT(NBTTagCompound nbt)
@@ -54,10 +54,17 @@ public interface ISaveableDataHoldingInheritanceTree<E extends ISaveableDataHold
         setData(data);
     }
 
+    default D deserializeData(@NotNull final N dataNbt)
+    {
+        D data = getNewDataInstance();
+        data.deserializeNBT(dataNbt);
+        return data;
+    }
+
     /**
-     * Method used to deserialize the data that should be stored in this element, without setting the data stored in this element.
-     * @param dataNbt The NBT of the data to deserialize.
-     * @return The data stored in the NBT.
+     * Method to get a new clean instance of the data stored in this tree.
+     * @return The clean instance of the data stored in this tree.
      */
-    D deserializeData(@NotNull final N dataNbt);
+    D getNewDataInstance();
+
 }
