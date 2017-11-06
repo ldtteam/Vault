@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 public interface IGrouping extends ISaveableDataHoldingInheritanceTree<IGrouping, IPermissionNode, NBTTagCompound>
 {
 
+
+
     @Override
     default IPermissionNode deserializeData(@NotNull final NBTTagCompound dataNbt)
     {

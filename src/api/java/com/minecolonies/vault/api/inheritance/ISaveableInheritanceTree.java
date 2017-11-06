@@ -35,7 +35,7 @@ public interface ISaveableInheritanceTree<E extends ISaveableInheritanceTree<E>>
             final ISaveableInheritanceTree<E> newInstance = getNewInstance();
 
             newInstance.deserializeNBT(c);
-            newInstance.setParent(this);
+            newInstance.setParent((E) this);
         });
     }
 

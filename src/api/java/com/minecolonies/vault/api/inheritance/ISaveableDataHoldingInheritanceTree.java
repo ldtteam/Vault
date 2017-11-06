@@ -45,7 +45,7 @@ public interface ISaveableDataHoldingInheritanceTree<E extends ISaveableDataHold
             final ISaveableInheritanceTree<E> newInstance = getNewInstance();
 
             newInstance.deserializeNBT(c);
-            newInstance.setParent(this);
+            newInstance.setParent((E) this);
         });
 
         N dataNbt = (N) nbt.getTag(CONST_NBT_DATA);
