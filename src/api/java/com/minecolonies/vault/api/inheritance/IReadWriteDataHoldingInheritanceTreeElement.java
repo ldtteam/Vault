@@ -2,6 +2,9 @@ package com.minecolonies.vault.api.inheritance;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public interface IReadWriteDataHoldingInheritanceTreeElement<E extends IReadWriteDataHoldingInheritanceTreeElement<E, D>, D> extends IReadOnlyDataHoldingInheritanceTreeElement<E, D>
 {
 
@@ -16,6 +19,9 @@ public interface IReadWriteDataHoldingInheritanceTreeElement<E extends IReadWrit
      */
     default void clear()
     {
+        final Set<E> childrenCopy = new HashSet<>(getChildren());
+
+        childrenCopy.forEach(c -> c.setParent(null));
         setData(null);
     }
 }

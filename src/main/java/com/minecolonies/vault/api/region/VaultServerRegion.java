@@ -4,21 +4,42 @@ import com.minecolonies.vault.api.grouping.VaultGroup;
 import com.minecolonies.vault.api.inheritance.VaultSaveableDataHoldingInheritanceTreeElement;
 import com.minecolonies.vault.api.location.ILocation;
 import com.minecolonies.vault.api.permission.VaultPermissionNode;
-import com.minecolonies.vault.api.permission.VaultPermissionNodeData;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * ------------ Class not Documented ------------
+ * Represents the default configuration on a server.
+ * Also known as server wide configuration.
  */
-public class VaultServerRegion extends VaultSaveableDataHoldingInheritanceTreeElement<VaultServerRegion, VaultGroup, NBTTagCompound> implements IRegion<VaultServerRegion, VaultGroup, VaultPermissionNode, VaultPermissionNodeData, NBTTagCompound>
+public class VaultServerRegion extends VaultSaveableDataHoldingInheritanceTreeElement<VaultServerRegion, VaultGroup, NBTTagCompound> implements IRegion<VaultServerRegion, VaultGroup, VaultPermissionNode>
 {
+
+    public VaultServerRegion()
+    {
+        setData(getNewDataInstance());
+
+
+    }
 
     @Override
     public boolean isIn(@NotNull final ILocation location)
     {
         return true;
+    }
+
+    @Override
+    public Integer getDimensionId()
+    {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public AxisAlignedBB getRegion()
+    {
+        return null;
     }
 
     @Override

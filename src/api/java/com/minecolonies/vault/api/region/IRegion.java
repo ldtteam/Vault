@@ -4,8 +4,6 @@ import com.minecolonies.vault.api.grouping.IGroup;
 import com.minecolonies.vault.api.inheritance.ISaveableDataHoldingInheritanceTree;
 import com.minecolonies.vault.api.location.ILocation;
 import com.minecolonies.vault.api.permission.IPermissionNode;
-import com.minecolonies.vault.api.permission.IPermissionNodeData;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  * A single {@link IRegion region} can be divided into multiple children each with their own properties and characteristics.
  * These divisions of {@link IRegion regions} into smaller children is implemented into an inheritance tree.
  */
-public interface IRegion<R extends IRegion<R, G, P, D, N>, G extends IGroup<G, P, D, N>, P extends IPermissionNode<P, D, N>, D extends IPermissionNodeData<N>, N extends NBTBase> extends ISaveableDataHoldingInheritanceTree<R, G, NBTTagCompound>
+public interface IRegion<R extends IRegion<R, G, P>, G extends IGroup<G, P>, P extends IPermissionNode<P>> extends ISaveableDataHoldingInheritanceTree<R, G, NBTTagCompound>
 {
 
     /**
@@ -43,14 +41,34 @@ public interface IRegion<R extends IRegion<R, G, P, D, N>, G extends IGroup<G, P
 
     /**
      * Method to get the dimension Id of the world this Region is in.
-     * @return The dimension Id this world is in.
+     * @return The dimension Id this world is in, null if it is serverwide.
      */
-    int getDimensionId();
+    Integer getDimensionId();
 
     /**
-     *
-     * @return
+     * Method used to check is this region is server wide.
+     * @return True when server wide, false when not.
+     */
+    default boolean isServerWide()
+    {
+        return getDimensionId() == null;
+    }
+
+    /**
+     * Returns the BB of the region.
+     * @return The bounding box of the reqion, or null when it is worldwide.
      */
     @Nullable
     AxisAlignedBB getRegion();
+
+    /**
+     * Method used to check if this region is world wide.
+     * Is always true when this is a serverwide region ({@link #isServerWide()} returns true).
+     *
+     * @return True when world wide, false when not.
+     */
+    default boolean isWorldWide()
+    {
+        return isServerWide() || getRegion() == null;
+    }
 }

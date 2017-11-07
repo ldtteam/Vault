@@ -4,7 +4,6 @@ import com.minecolonies.vault.api.grouping.VaultGroup;
 import com.minecolonies.vault.api.inheritance.VaultSaveableDataHoldingInheritanceTreeElement;
 import com.minecolonies.vault.api.location.ILocation;
 import com.minecolonies.vault.api.permission.VaultPermissionNode;
-import com.minecolonies.vault.api.permission.VaultPermissionNodeData;
 import com.minecolonies.vault.api.utils.BlockPosUtils;
 import com.minecolonies.vault.api.utils.NBTUtils;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,16 +13,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- *
+ * A piece of the minecraft universe in a world.
  */
-public class VaultWorldRegion extends VaultSaveableDataHoldingInheritanceTreeElement<VaultWorldRegion, VaultGroup, NBTTagCompound> implements IRegion<VaultWorldRegion, VaultGroup, VaultPermissionNode, VaultPermissionNodeData, NBTTagCompound>
+public class VaultWorldRegion extends VaultSaveableDataHoldingInheritanceTreeElement<VaultWorldRegion, VaultGroup, NBTTagCompound> implements IRegion<VaultWorldRegion, VaultGroup, VaultPermissionNode>
 {
 
     //NBTTags
     private static final String CONST_NBT_REGION = "Region";
     private static final String CONST_NBT_DIM = "Dim";
 
-    private int dimensionId;
+    private Integer dimensionId;
     private AxisAlignedBB region;
 
     public VaultWorldRegion(final int dimensionId)
@@ -88,7 +87,7 @@ public class VaultWorldRegion extends VaultSaveableDataHoldingInheritanceTreeEle
     }
 
     @Override
-    public int getDimensionId()
+    public Integer getDimensionId()
     {
         return dimensionId;
     }

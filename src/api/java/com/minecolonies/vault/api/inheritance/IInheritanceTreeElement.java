@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * This interface describes common properties, methods and characteristics of {@link IInheritanceTreeElement elements} of an common Tree structure with inheritance.
  * @param <E> The type of element this is, also defines the type of the entire tree.
  */
-public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
+public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>> extends Set<E>
 {
 
     /**
@@ -190,5 +190,114 @@ public interface IInheritanceTreeElement<E extends IInheritanceTreeElement<E>>
         }
 
         return null;
+    }
+
+    @Override
+    default int size()
+    {
+        return getChildren().stream().mapToInt(IInheritanceTreeElement::size).sum() + 1;
+    }
+
+
+    @Override
+    default boolean isEmpty()
+    {
+        return false;
+    }
+
+
+    @Override
+    default boolean contains(Object o)
+    {
+        if (this.equals(o))
+            return true;
+
+        return getChildren().stream().anyMatch(c -> c.contains(o));
+    }
+
+    default ImmutableSet<E> getAllTreeElements()
+    {
+        final ImmutableSet.Builder<E> builder = ImmutableSet.builder();
+
+        builder.add((E) this);
+        getChildren().forEach(c -> builder.addAll(c.getAllTreeElements()));
+
+        return builder.build();
+    }
+
+    @NotNull
+    @Override
+    default Iterator<E> iterator()
+    {
+        return getAllTreeElements().iterator();
+    }
+
+    @NotNull
+    @Override
+    default Object[] toArray()
+    {
+        return getAllTreeElements().toArray();
+    }
+
+    @NotNull
+    @Override
+    default <T> T[] toArray(@NotNull T[] a)
+    {
+        return getAllTreeElements().toArray(a);
+    }
+
+    @Override
+    default boolean add(E e)
+    {
+        this.addChild(e);
+        return true;
+    }
+
+    @Override
+    default boolean remove(Object o)
+    {
+        this.removeChild((E) o);
+        return true;
+    }
+
+    @Override
+    default boolean containsAll(@NotNull Collection<?> c)
+    {
+        return !c.stream().map(this::contains).filter(b -> !b).findAny().orElse(true);
+    }
+
+    @Override
+    default boolean addAll(@NotNull Collection<? extends E> c)
+    {
+        return c.stream().anyMatch(this::add);
+    }
+
+    @Override
+    default boolean retainAll(@NotNull Collection<?> c)
+    {
+        final Set<E> childrenCopy = new HashSet<>(getChildren());
+
+        boolean rootModified = childrenCopy.stream().filter(o -> !c.contains(o)).map(o -> o.setParent(null)).findAny().orElse(null) != null;
+        boolean residualChildrenModified = getChildren().stream().anyMatch(o -> o.retainAll(c));
+
+        return rootModified || residualChildrenModified;
+    }
+
+    @Override
+    default boolean removeAll(@NotNull Collection<?> c)
+    {
+        final Set<E> childrenCopy = new HashSet<>(getChildren());
+
+        boolean rootModified = childrenCopy.stream().filter(o -> c.contains(o)).map(o -> o.setParent(null)).findAny().orElse(null) != null;
+        boolean residualChildrenModified = getChildren().stream().anyMatch(o -> o.removeAll(c));
+
+        return rootModified || residualChildrenModified;
+    }
+
+    @Override
+    default void clear()
+    {
+         final Set<E> childrenCopy = new HashSet<>(getChildren());
+         childrenCopy.forEach(c -> c.setParent(null));
     }
 }
