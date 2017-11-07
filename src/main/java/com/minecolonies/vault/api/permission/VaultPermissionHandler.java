@@ -1,18 +1,21 @@
 package com.minecolonies.vault.api.permission;
 
-import com.google.common.collect.ImmutableList;
 import com.minecolonies.vault.api.grouping.VaultGroup;
+import com.minecolonies.vault.api.region.IRegion;
 import com.minecolonies.vault.api.region.VaultServerRegion;
+import com.minecolonies.vault.api.region.VaultWorldRegion;
 import com.minecolonies.vault.api.utils.LogUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
-import net.minecraftforge.server.permission.context.ContextKeys;
 import net.minecraftforge.server.permission.context.IContext;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +27,8 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
     private final static Logger logger = LogUtils.constructLoggerForClass(VaultPermissionHandler.class);
 
     private final VaultServerRegion defaults = new VaultServerRegion();
+
+    private final Map<Integer, VaultWorldRegion> worldRegionMap = new HashMap<>();
 
     public VaultPermissionHandler()
     {
@@ -106,15 +111,61 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
         return defaults.getData().getData().stream().map(t -> t.getName()).collect(Collectors.toSet());
     }
 
-    //If context null -> Default
-
     @Override
     public boolean hasPermission(final GameProfile profile, final String node, @Nullable final IContext context)
     {
-        //TODO extract group from world in context if exists.
-        final VaultGroup rootSearchGroup = (context == null || context.getWorld() == null || context.getPlayer() == null) ? defaults.getData() : null;
+        if (context == null)
+            return checkForPermissionInSpecificRegionAnonymously(defaults, node) != PermissionType.BLOCKING;
 
+        IRegion<?, VaultGroup, VaultPermissionNode> region = context.getWorld() != null && worldRegionMap.containsKey(context.getWorld().provider.getDimension()) ? worldRegionMap.get(context.getWorld().provider.getDimension()) : defaults;
 
+        if (context.getPlayer() != null)
+            return checkForPermissionInSpecificRegionWithPlayer(region, node, context.getPlayer().getUniqueID()) != PermissionType.DONOTCARE;
+        else if (profile != null)
+            return checkForPermissionInSpecificRegionWithPlayer(region, node, profile.getId()) != PermissionType.DONOTCARE;
+        else
+            return checkForPermissionInSpecificRegionAnonymously(region, node) != PermissionType.DONOTCARE;
+    }
+
+    public PermissionType checkForPermissionInSpecificRegionWithPlayer(final IRegion<?, VaultGroup, VaultPermissionNode> region, final String name, final UUID player)
+    {
+        VaultGroup group = region.getData().getDeepestChild(g -> g.getPlayers().contains(player) && checkForPermissionInGroup(g, name) != PermissionType.DONOTCARE);
+        if (group == null && !region.isRoot())
+            return checkForPermissionInSpecificRegionWithPlayer(region.getParent(), name, player);
+
+        if (group == null)
+        {
+            return checkForPermissionInSpecificRegionAnonymously(region, name);
+        }
+
+        return checkForPermissionInGroup(group, name);
+    }
+
+    public PermissionType checkForPermissionInSpecificRegionAnonymously(final IRegion<?, VaultGroup, VaultPermissionNode> region, final String name)
+    {
+        VaultGroup group = region.getData().getDeepestChild(g -> checkForPermissionInGroup(g, name) != PermissionType.DONOTCARE);
+        if (group == null && !region.isRoot())
+            return checkForPermissionInSpecificRegionAnonymously(region.getParent(), name);
+
+        if (group == null)
+        {
+            return PermissionType.DONOTCARE;
+        }
+
+        return checkForPermissionInGroup(group, name);
+    }
+
+    public PermissionType checkForPermissionInGroup(final VaultGroup group, final String name)
+    {
+        VaultPermissionNode node = group.getData().getDeepestChild(n -> n.getName().equalsIgnoreCase("*." + name));
+        if (node == null && !group.isRoot())
+            return checkForPermissionInGroup(group.getParent(), name);
+
+        if (node == null){
+            return PermissionType.DONOTCARE;
+        }
+
+        return node.getType();
     }
 
 
