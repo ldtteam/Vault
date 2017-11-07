@@ -75,4 +75,13 @@ public String getKey()
     {
         return type;
     }
+
+    /**
+     * Method used to set the type on the node.
+     * @param type The new type of this node.
+     */
+    public void setType(@NotNull final PermissionType type)
+    {
+        this.type = type;
+    }
 }

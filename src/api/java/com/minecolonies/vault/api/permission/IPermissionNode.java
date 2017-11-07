@@ -25,4 +25,17 @@ public interface IPermissionNode<N extends IPermissionNode<N>> extends ISaveable
      */
     @NotNull
     PermissionType getType();
+
+    /**
+     * Method used to get the entire name of the permission node.
+     * @return the entire name of the permission node.
+     */
+    @NotNull
+    default String getName()
+    {
+        if (isRoot())
+            return getKey();
+
+        return String.format("%s.%s", getParent().getName(), getKey());
+    }
 }
