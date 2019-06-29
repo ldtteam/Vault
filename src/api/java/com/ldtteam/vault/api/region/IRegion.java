@@ -33,7 +33,7 @@ public interface IRegion<R extends IRegion<R, G, P>, G extends IGroup<G, P>, P e
      * @return The smallest possible child of this region that contains the target. Null if not found.
      */
     @Nullable
-    default IRegion getSmallestChild(@NotNull final ILocation target){
+    default R getSmallestChild(@NotNull final ILocation target){
         if (!isIn(target))
             return null;
 

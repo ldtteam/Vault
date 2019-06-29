@@ -1,9 +1,6 @@
 package com.ldtteam.vault.api.common.proxy;
 
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import org.jetbrains.annotations.NotNull;
 
 public interface IVaultProxy
@@ -30,10 +27,16 @@ public interface IVaultProxy
 
 
     /**
-     * Method called during the start-start phase of the engine configuration.
+     * Method called during the pre-start phase of the engine configuration.
      * @param event The {@link FMLServerStartingEvent event} that is fired during engine configuration
      */
     default void serverLoad(final FMLServerStartingEvent event) {}
+
+    /**
+     * Method called during the start-start phase of the engine configuration.
+     * @param event The {@link FMLServerStartedEvent event} that is fired during engine configuration
+     */
+    default void serverLoaded(final FMLServerStartedEvent event) {}
 
     /**
      * Method called to initialize the networking system.

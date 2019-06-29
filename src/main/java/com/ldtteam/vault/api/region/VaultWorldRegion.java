@@ -44,7 +44,7 @@ public class VaultWorldRegion extends VaultSaveableDataHoldingInheritanceTreeEle
             if (region == null)
                 return true;
 
-            return region.isVecInside(BlockPosUtils.toVector(location.getInDimensionPosition()));
+            return region.contains(BlockPosUtils.toVector(location.getInDimensionPosition()));
         }
 
         return false;

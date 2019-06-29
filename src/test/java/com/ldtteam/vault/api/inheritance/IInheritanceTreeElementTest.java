@@ -153,14 +153,14 @@ public class IInheritanceTreeElementTest
         runSiblingsTest(ImmutableSet.of(rootChild2Child1Child1, rootChild2Child1Child2, rootChild2Child3Child1, rootChild2Child3Child2), t -> t.getMaximalOrderSiblings());
     }
 
-    private void runSiblingsTest(Set<IInheritanceTreeElement<TestTreeImplementation>> toTest, Function<IInheritanceTreeElement<TestTreeImplementation>, ImmutableSet<IInheritanceTreeElement<TestTreeImplementation>>> siblingsMethod) throws Exception
+    private void runSiblingsTest(Set<TestTreeImplementation> toTest, Function<TestTreeImplementation, ImmutableSet<TestTreeImplementation>> siblingsMethod) throws Exception
     {
-        toTest.forEach((IInheritanceTreeElement<TestTreeImplementation> t) -> {
-            Set<IInheritanceTreeElement<TestTreeImplementation>> result = new HashSet<>();
+        toTest.forEach((TestTreeImplementation t) -> {
+            Set<TestTreeImplementation> result = new HashSet<>();
             result.addAll(toTest);
             result.remove(t);
 
-            final ImmutableSet<IInheritanceTreeElement<TestTreeImplementation>> siblings = siblingsMethod.apply(t);
+            final ImmutableSet<TestTreeImplementation> siblings = siblingsMethod.apply(t);
 
             assertEquals(result.size(), siblings.size());
             result.forEach(e -> assertTrue(siblings.contains(e)));
@@ -173,18 +173,18 @@ public class IInheritanceTreeElementTest
     private class TestTreeImplementation implements IInheritanceTreeElement<TestTreeImplementation>
     {
 
-        IInheritanceTreeElement<TestTreeImplementation>       parent;
-        Set<IInheritanceTreeElement<TestTreeImplementation>> children = new HashSet<>();
-        
+        TestTreeImplementation       parent;
+        Set<TestTreeImplementation> children = new HashSet<>();
+
         @Nullable
         @Override
-        public IInheritanceTreeElement<TestTreeImplementation> getParent()
+        public TestTreeImplementation getParent()
         {
             return parent;
         }
 
         @Override
-        public IInheritanceTreeElement<TestTreeImplementation> setParent(@Nullable final IInheritanceTreeElement<TestTreeImplementation> parent)
+        public TestTreeImplementation setParent(@Nullable final TestTreeImplementation parent)
         {
             if (getParent() != null)
                 getParent().removeChild(this);
@@ -198,13 +198,13 @@ public class IInheritanceTreeElementTest
         }
 
         @Override
-        public ImmutableSet<IInheritanceTreeElement<TestTreeImplementation>> getChildren()
+        public ImmutableSet<TestTreeImplementation> getChildren()
         {
             return ImmutableSet.copyOf(children);
         }
 
         @Override
-        public IInheritanceTreeElement<TestTreeImplementation> addChild(@NotNull final IInheritanceTreeElement<TestTreeImplementation> child)
+        public TestTreeImplementation addChild(@NotNull final TestTreeImplementation child)
           throws IllegalArgumentException
         {
             if (children.contains(child) || child.getParent() != this)
@@ -216,7 +216,7 @@ public class IInheritanceTreeElementTest
         }
 
         @Override
-        public IInheritanceTreeElement<TestTreeImplementation> removeChild(@NotNull final IInheritanceTreeElement<TestTreeImplementation> child)
+        public TestTreeImplementation removeChild(@NotNull final TestTreeImplementation child)
           throws IllegalArgumentException
         {
             if (!children.contains(child) || child.getParent() != this)
@@ -225,6 +225,17 @@ public class IInheritanceTreeElementTest
             children.remove(child);
             
             return this;
+        }
+
+        /**
+         * Method used to get a cloned empty element, without parent (so as root) and without children.
+         *
+         * @return A new instance of this element, as empty root.
+         */
+        @Override
+        public TestTreeImplementation cloneAsEmptyRoot()
+        {
+            return new TestTreeImplementation();
         }
     }
 }

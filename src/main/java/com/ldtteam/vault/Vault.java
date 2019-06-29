@@ -4,10 +4,7 @@ import com.ldtteam.vault.api.common.proxy.IVaultProxy;
 import com.ldtteam.vault.api.constants.ModConstants;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +55,9 @@ public class Vault
         proxy.serverLoad(event);
     }
 
-
-
+    @Mod.EventHandler
+    public void onFMLServerStarted(final FMLServerStartedEvent event)
+    {
+        proxy.serverLoaded(event);
+    }
 }

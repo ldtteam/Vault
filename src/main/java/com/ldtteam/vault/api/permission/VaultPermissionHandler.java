@@ -1,6 +1,5 @@
 package com.ldtteam.vault.api.permission;
 
-import com.ldtteam.vault.api.grouping.IGroup;
 import com.ldtteam.vault.api.grouping.VaultGroup;
 import com.ldtteam.vault.api.location.Location;
 import com.ldtteam.vault.api.region.IRegion;
@@ -19,10 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -34,21 +30,28 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
     private static final String CONST_NBT_DIMID = "dim";
     private static final String CONST_NBT_DIMDATA = "data";
 
+    private static VaultPermissionHandler ourInstance = new VaultPermissionHandler();
     private static final Logger logger = LogUtils.constructLoggerForClass(VaultPermissionHandler.class);
+
+    public static VaultPermissionHandler getInstance()
+    {
+        return ourInstance;
+    }
+
 
     private final VaultServerRegion defaults = new VaultServerRegion();
 
     private final Map<Integer, VaultWorldRegion> worldRegionMap = new HashMap<>();
 
-    public VaultPermissionHandler()
+    private VaultPermissionHandler()
     {
         setupDefaultRootRegion();
     }
 
     private void setupDefaultRootRegion() {
         final VaultGroup rootGroup = new VaultGroup();
-        final VaultPermissionNode allPermissionNode = new VaultPermissionNode();
-        rootGroup.setData(allPermissionNode);
+        final VaultPermissionNode rootPermissionNode = new VaultPermissionNode();
+        rootGroup.setData(rootPermissionNode);
 
         final VaultGroup opGroup = new VaultGroup("op", "Vanilla minecraft default group that holds the operators", "OP", DefaultPermissionLevel.OP);
         final VaultPermissionNode opPermissionNode = new VaultPermissionNode();
@@ -56,7 +59,7 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
         opGroup.setParent(rootGroup);
 
         final VaultGroup allGroup = new VaultGroup("all", "Vanilla minecraft default group that holds the administrators", "", DefaultPermissionLevel.ALL);
-        final VaultPermissionNode allPersmissionNode = new VaultPermissionNode();
+        final VaultPermissionNode allPermissionNode = new VaultPermissionNode();
         allGroup.setData(allPermissionNode);
         allGroup.setParent(opGroup);
 
@@ -125,7 +128,16 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
     public boolean hasPermission(@Nullable final GameProfile profile, final String node, @Nullable final IContext context)
     {
         if (context == null)
-            return checkForPermissionInSpecificRegionAnonymously(defaults, node) != PermissionType.BLOCKING;
+        {
+            if (profile == null)
+            {
+                return checkForPermissionInSpecificRegionAnonymously(defaults, node) != PermissionType.BLOCKING;
+            }
+            else
+            {
+                return checkForPermissionInSpecificRegionWithPlayer(defaults, node, profile.getId()) != PermissionType.BLOCKING;
+            }
+        }
 
         IRegion<?, VaultGroup, VaultPermissionNode> region = context.getWorld() != null && worldRegionMap.containsKey(context.getWorld().provider.getDimension()) ? worldRegionMap.get(context.getWorld().provider.getDimension()) : defaults;
 
@@ -134,6 +146,9 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
             BlockPos target = context.has(ContextKeys.POS) ? context.get(ContextKeys.POS) : context.getPlayer().getPosition();
             region = region.getSmallestChild(new Location(context.getWorld() != null ? context.getWorld().provider.getDimension() : -1, target));
         }
+
+        if (region == null)
+            region = defaults;
 
         if (context.getPlayer() != null)
         {
@@ -154,6 +169,11 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
         VaultGroup group = region.getData().getDeepestChild(g -> g.getPlayers().contains(player) && checkForPermissionInGroup(g, name) != PermissionType.DONOTCARE);
         if (group == null && !region.isRoot())
             return checkForPermissionInSpecificRegionWithPlayer(region.getParent(), name, player);
+
+        if (group == null && region != defaults)
+        {
+            return checkForPermissionInSpecificRegionWithPlayer(defaults, name, player);
+        }
 
         if (group == null)
         {
