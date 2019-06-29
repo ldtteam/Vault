@@ -1,10 +1,12 @@
 package com.ldtteam.vault.common.proxy;
 
 import com.google.common.collect.Sets;
+import com.ldtteam.vault.Vault;
 import com.ldtteam.vault.api.IVaultAPI;
 import com.ldtteam.vault.api.VaultAPI;
 import com.ldtteam.vault.api.common.proxy.IVaultProxy;
 import com.ldtteam.vault.api.permission.VaultPermissionHandler;
+import com.ldtteam.vault.api.utils.NBTUtils;
 import com.ldtteam.vault.common.context.EntityContext;
 import com.ldtteam.vault.common.context.RawWorldBlockPosContext;
 import com.ldtteam.vault.common.event.EventAnalyzer;
@@ -13,9 +15,13 @@ import jdk.nashorn.internal.ir.Block;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.CommandEvent;
@@ -45,6 +51,8 @@ import net.minecraftforge.server.permission.context.PlayerContext;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Set;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -82,6 +90,27 @@ public class CommonVaultProxy implements IVaultProxy
                     PermissionAPI.registerNode(dataTriple.getLeft(), dataTriple.getMiddle(), dataTriple.getRight());
                 });
             });
+
+            try
+            {
+                final File vaultFile = event.getServer().getFile("vault.dat");
+                if (vaultFile.exists())
+                {
+                    final NBTTagCompound compound = CompressedStreamTools.read(vaultFile);
+                    if (compound != null)
+                    {
+                        VaultPermissionHandler.getInstance().deserializeNBT(
+                          compound
+                        );
+                    }
+                }
+
+                CompressedStreamTools.write(VaultPermissionHandler.getInstance().serializeNBT(), vaultFile);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -117,7 +146,7 @@ public class CommonVaultProxy implements IVaultProxy
             @Override
             public String getRight()
             {
-                return "Execution rights for the command: " + command.getName() + " with usage: " + command.getUsage(server);
+                return "Execution rights for the command: " + command.getName() + " with usage: " + I18n.translateToLocal(command.getUsage(server));
             }
         });
 

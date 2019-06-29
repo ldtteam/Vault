@@ -11,6 +11,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.context.ContextKeys;
 import net.minecraftforge.server.permission.context.IContext;
@@ -29,6 +30,8 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
     //NBTConst
     private static final String CONST_NBT_DIMID = "dim";
     private static final String CONST_NBT_DIMDATA = "data";
+    private static final String CONST_NBT_WORLDS = "worlds";
+    private static final String CONST_NBT_SERVER_WIDE = "server";
 
     private static VaultPermissionHandler ourInstance = new VaultPermissionHandler();
     private static final Logger logger = LogUtils.constructLoggerForClass(VaultPermissionHandler.class);
@@ -40,6 +43,7 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
 
 
     private final VaultServerRegion defaults = new VaultServerRegion();
+    private final VaultServerRegion serverWide = new VaultServerRegion();
 
     private final Map<Integer, VaultWorldRegion> worldRegionMap = new HashMap<>();
 
@@ -81,6 +85,7 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
         VaultGroup matchingDefaultLevelGroup = defaultRootGroup.getDeepestChild(c -> c.getVanillaPermissionLevel() != null && c.getVanillaPermissionLevel().equals(level));
 
         VaultPermissionNode currentWorkingNode = matchingDefaultLevelGroup.getData();
+        VaultPermissionNode previousWorkingNode = matchingDefaultLevelGroup.getData();
 
         //Find the deepest node along the elements tree.
         int index = 0;
@@ -90,6 +95,7 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
             if (currentWorkingNode == null)
                 break;
 
+            previousWorkingNode = currentWorkingNode;
             currentWorkingNode = currentWorkingNode.getChildren().stream().filter(c -> c.getKey().equalsIgnoreCase(key)).findFirst().orElse(null);
         }
 
@@ -107,11 +113,13 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
             return;
         }
 
+        currentWorkingNode = previousWorkingNode;
+        index--;
         for (int i = 0; index < nodeElements.length; index++)
         {
             String key = nodeElements[index];
 
-            final VaultPermissionNode newNode = new VaultPermissionNode(key, desc, (index == nodeElements.length - 1) ? PermissionType.ACCEPTING : PermissionType.DONOTCARE);
+            final VaultPermissionNode newNode = new VaultPermissionNode(key, (index == nodeElements.length - 1) ? desc : "", (index == nodeElements.length - 1) ? PermissionType.ACCEPTING : PermissionType.DONOTCARE);
             newNode.setParent(currentWorkingNode);
 
             currentWorkingNode = newNode;
@@ -230,22 +238,27 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
     }
 
     @Override
-    public NBTTagList serializeNBT()
+    public NBTTagCompound serializeNBT()
     {
-        return worldRegionMap.keySet().stream().map(dimId -> {
+        final NBTTagCompound data = new NBTTagCompound();
+
+        data.setTag(CONST_NBT_WORLDS, worldRegionMap.keySet().stream().map(dimId -> {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setInteger(CONST_NBT_DIMID, dimId);
             compound.setTag(CONST_NBT_DIMDATA, worldRegionMap.get(dimId).serializeNBT());
             return compound;
-        }).collect(NBTUtils.toNBTTagList());
+        }).collect(NBTUtils.toNBTTagList()));
+        data.setTag(CONST_NBT_SERVER_WIDE, serverWide.serializeNBT());
+        data.setTag("defaults", defaults.serializeNBT());
+        return data;
     }
 
     @Override
-    public void deserializeNBT(final NBTTagList nbt)
+    public void deserializeNBT(final NBTTagCompound nbt)
     {
         worldRegionMap.clear();
 
-        NBTUtils.streamCompound(nbt).forEach(tag -> {
+        NBTUtils.streamCompound(nbt.getTagList(CONST_NBT_WORLDS, Constants.NBT.TAG_COMPOUND)).forEach(tag -> {
             Integer dimId = tag.getInteger(CONST_NBT_DIMID);
 
             VaultWorldRegion worldData = new VaultWorldRegion(dimId);
@@ -253,5 +266,7 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
 
             worldRegionMap.put(dimId, worldData);
         });
+
+        serverWide.deserializeNBT(nbt.getCompoundTag(CONST_NBT_SERVER_WIDE));
     }
 }

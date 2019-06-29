@@ -19,9 +19,6 @@ public class VaultServerRegion extends VaultSaveableDataHoldingInheritanceTreeEl
 
     public VaultServerRegion()
     {
-        setData(getNewDataInstance());
-
-
     }
 
     @Override

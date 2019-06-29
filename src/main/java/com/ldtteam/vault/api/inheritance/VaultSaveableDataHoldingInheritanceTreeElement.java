@@ -14,6 +14,11 @@ public abstract class VaultSaveableDataHoldingInheritanceTreeElement<E extends V
 
     private D       D;
 
+    public VaultSaveableDataHoldingInheritanceTreeElement()
+    {
+        setData(getNewDataInstance());
+    }
+
     @Override
     public void setData(@Nullable final D data)
     {
