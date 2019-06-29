@@ -73,7 +73,7 @@ dependencies {
     compile 'com.intellij:annotations:+@jar'
 }
 
-group = "com.minecolonies"
+group = "com.ldtteam"
 def buildnumber = System.getenv()['BUILD_NUMBER'] != null ? System.getenv()['BUILD_NUMBER'] : "custom"
 version = "${version_minecraft}-${version_vault_major}.${version_vault_minor}.${version_vault_feature}.${buildnumber}";
 archivesBaseName="vault"
@@ -198,7 +198,7 @@ task("createChangelog") {
     group = 'upload'
 
     doLast {
-        def teamCityURL = "http://teamcity.minecolonies.com/"
+        def teamCityURL = "http://teamcity.ldtteam.com/"
         def file = new FileOutputStream("build/changelog.md")
         def out = new BufferedOutputStream(file)
         def changesXML = new XmlSlurper().parse(teamCityURL + "guestAuth/app/rest/changes?locator=build:(id:" + teamcity["teamcity.build.id"] + ")")
