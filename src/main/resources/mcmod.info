@@ -1,0 +1,14 @@
+[
+  {
+    "modid": "vault",
+    "name": "Vault",
+    "description": "Permission manager for forge.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "http://github.com/ldtteam/vault",
+    "updateUrl": "",
+    "authorList": ["Let's Dev Together Team"],
+    "screenshots": [],
+    "dependencies": ["blockout"]
+  }
+]

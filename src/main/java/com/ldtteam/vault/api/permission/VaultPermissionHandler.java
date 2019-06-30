@@ -269,4 +269,14 @@ public class VaultPermissionHandler implements IVaultPermissionHandler
 
         serverWide.deserializeNBT(nbt.getCompoundTag(CONST_NBT_SERVER_WIDE));
     }
+
+    public Map<Integer, VaultWorldRegion> getWorldRegionMap()
+    {
+        return worldRegionMap;
+    }
+
+    public VaultServerRegion getServerWide()
+    {
+        return serverWide;
+    }
 }

@@ -12,22 +12,20 @@ buildscript {
 }
 
 plugins {
-    id "org.sonarqube" version "2.3"
-    id "com.matthewprenger.cursegradle" version "1.0.7"
+    id "com.matthewprenger.cursegradle" version "1.1.0"
 }
 
-sonarqube {
-    properties{
-        property "sonar.host.url", "http://home.kk-sc.de:9000"
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.projectName", "Minecolonies"
-        property "sonar.branch", System.getenv()['TEAMCITY_BRANCH'] != null ? System.getenv()['TEAMCITY_BRANCH'] : System.getenv()['TRAVIS_BRANCH']
+repositories {
+    maven {
+        name 'LDTTeam - Modding'
+        url 'https://ldtteam.jfrog.io/ldtteam/modding/'
     }
 }
 
 apply plugin: 'idea'
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'jacoco'
+apply plugin: 'maven'
 
 jacocoTestReport {
     reports {
@@ -63,7 +61,23 @@ sourceSets {
     }
 }
 
+//Force minecraft compatible versions of dependencies
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.guava:guava:21.0'
+    }
+}
+
+configurations {
+    shade {
+        transitive = false;
+    }
+}
+
 dependencies {
+    deobfCompile "com.ldtteam.blockout:blockout-api-forge-1.12:${blockout_version}"
+    deobfCompile "com.ldtteam.blockout:blockout-forge-1.12:${blockout_version}"
+
     testCompile 'junit:junit:4.11'
     testCompile "org.mockito:mockito-core:1.+"
     testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '1.6.5'
@@ -106,6 +120,23 @@ processResources {
     }
 }
 
+jar {
+    from (configurations.shade.files){
+        include '*'
+        into 'META-INF/libraries'
+    }
+
+    manifest {
+        attributes([
+                'ContainedDeps': configurations.shade.files.collect { it.name }.join(' '),
+                'Maven-Artifact': "${project.group}:${project.archivesBaseName}:${project.version}:forge-1.12",
+                'Timestamp': System.currentTimeMillis()
+        ])
+    }
+
+    classifier 'universal-forge-1.12'
+}
+
 javadoc {
     source += sourceSets.api.allSource
 }
@@ -125,11 +156,6 @@ task apiJar(type: Jar) {
     classifier 'api'
 }
 
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    appendix = 'deobf'
-}
-
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from 'build/docs/javadoc'
@@ -147,7 +173,6 @@ jar {
 artifacts {
     archives javadocJar
     archives apiJar
-    archives deobfJar
 }
 
 idea {
@@ -185,7 +210,15 @@ curseforge {
             changelogType = 'markdown'
             releaseType = System.getenv().CURSERELEASETYPE
 
-            addArtifact deobfJar
+            mainArtifact (jar) {
+                displayName = "Vault: " + version
+
+                relations {
+                    requiredDependency 'blockout' // blockout is required
+                }
+            }
+
+            addArtifact apiJar
         }
     }
     else

@@ -1,5 +1,6 @@
 package com.ldtteam.vault.common.proxy;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.ldtteam.vault.Vault;
 import com.ldtteam.vault.api.IVaultAPI;
@@ -13,7 +14,9 @@ import com.ldtteam.vault.common.event.EventAnalyzer;
 import com.ldtteam.vault.api.event.EventPermissionHandler;
 import jdk.nashorn.internal.ir.Block;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -51,8 +54,10 @@ import net.minecraftforge.server.permission.context.PlayerContext;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -84,6 +89,7 @@ public class CommonVaultProxy implements IVaultProxy
     @Override
     public void serverLoad(final FMLServerStartingEvent event)
     {
+        //TODO: Replace the commands after the server gets loaded, to intercept the permissions check.
         event.getServer().addScheduledTask(() -> {
             event.getServer().getCommandManager().getCommands().values().forEach(command -> {
                 getPermissionDataFromCommand(event.getServer(), "command", command).forEach(dataTriple -> {
@@ -293,5 +299,40 @@ public class CommonVaultProxy implements IVaultProxy
             event -> new RawWorldBlockPosContext(event.getWorld(), event.getPos()),
             WorldEvent.PotentialSpawns.class
           );
+    }
+
+    private void setupVaultCommand(FMLServerStartingEvent event)
+    {
+        event.registerServerCommand(new CommandBase() {
+            @Override
+            public String getName()
+            {
+                return "vault";
+            }
+
+            @Override
+            public String getUsage(final ICommandSender sender)
+            {
+                return "/vault";
+            }
+
+            @Override
+            public List<String> getAliases()
+            {
+                return ImmutableList.of("v", "vl", "vlt", "vault");
+            }
+
+            @Override
+            public int getRequiredPermissionLevel()
+            {
+                return 4;
+            }
+
+            @Override
+            public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
+            {
+
+            }
+        });
     }
 }
