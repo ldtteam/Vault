@@ -30,7 +30,7 @@ public class VaultServerManagementUI
           PlayerEntity.fromForge(playerMP),
           guiKeyBuilder -> guiKeyBuilder
                              .forEntity(PlayerEntity.fromForge(playerMP))
-                             .ofFile(IIdentifier.create(ModConstants.CONST_MOD_ID, "guis/management/server/entrypoint.json"))
+                             .ofFile(IIdentifier.create(ModConstants.CONST_MOD_ID, "guis/management/server.json"))
                              .usingData(dataBuilder -> dataBuilder
                                                          .withControl("dimensionList", ListConstructionDataBuilder.class, listDataBuilder -> listDataBuilder
                                                                                                                                                .withDependentDataContext(
@@ -104,6 +104,10 @@ public class VaultServerManagementUI
                                 .withClickedEventHandler(((source, args) -> {
                                     final IGuiKey currentUi = IGuiController.getInstance().getOpenUI(PlayerEntity.fromForge(playerMP));
                                     VaultGroupManagementUI.openServerGroupManagementUi(playerMP, VaultPermissionHandler.getInstance().getServerWide(), currentUi);
+                                })))
+                               .withControl("close", Button.ButtonConstructionDataBuilder.class, closeBuilder -> closeBuilder
+                                .withClickedEventHandler(((source, args) -> {
+                                    IGuiController.getInstance().closeUI(PlayerEntity.fromForge(playerMP));
                                 })))
 
                              )

@@ -2,31 +2,28 @@ package com.ldtteam.vault.common.proxy;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.ldtteam.vault.Vault;
 import com.ldtteam.vault.api.IVaultAPI;
 import com.ldtteam.vault.api.VaultAPI;
 import com.ldtteam.vault.api.common.proxy.IVaultProxy;
 import com.ldtteam.vault.api.permission.VaultPermissionHandler;
-import com.ldtteam.vault.api.utils.NBTUtils;
 import com.ldtteam.vault.common.context.EntityContext;
 import com.ldtteam.vault.common.context.RawWorldBlockPosContext;
 import com.ldtteam.vault.common.event.EventAnalyzer;
 import com.ldtteam.vault.api.event.EventPermissionHandler;
-import jdk.nashorn.internal.ir.Block;
+import com.ldtteam.vault.common.gui.VaultServerManagementUI;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.*;
@@ -35,7 +32,6 @@ import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 import net.minecraftforge.event.entity.player.*;
-import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.minecraftforge.event.village.VillageSiegeEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -43,20 +39,15 @@ import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.server.command.CommandTreeBase;
 import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import net.minecraftforge.server.permission.PermissionAPI;
-import net.minecraftforge.server.permission.context.BlockPosContext;
-import net.minecraftforge.server.permission.context.Context;
 import net.minecraftforge.server.permission.context.PlayerContext;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -89,6 +80,8 @@ public class CommonVaultProxy implements IVaultProxy
     @Override
     public void serverLoad(final FMLServerStartingEvent event)
     {
+        setupVaultCommand(event);
+
         //TODO: Replace the commands after the server gets loaded, to intercept the permissions check.
         event.getServer().addScheduledTask(() -> {
             event.getServer().getCommandManager().getCommands().values().forEach(command -> {
@@ -307,19 +300,19 @@ public class CommonVaultProxy implements IVaultProxy
             @Override
             public String getName()
             {
-                return "vault";
+                return "assets/vault";
             }
 
             @Override
             public String getUsage(final ICommandSender sender)
             {
-                return "/vault";
+                return "/assets/vault";
             }
 
             @Override
             public List<String> getAliases()
             {
-                return ImmutableList.of("v", "vl", "vlt", "vault");
+                return ImmutableList.of("v", "vl", "vlt", "assets/vault");
             }
 
             @Override
@@ -331,7 +324,13 @@ public class CommonVaultProxy implements IVaultProxy
             @Override
             public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException
             {
+                if (!(sender instanceof EntityPlayerMP))
+                {
+                    sender.sendMessage(new TextComponentString("Only a player can execute the Vault command to open the UI"));
+                    return;
+                }
 
+                VaultServerManagementUI.openUi((EntityPlayerMP) sender);
             }
         });
     }
